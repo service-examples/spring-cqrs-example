@@ -10,6 +10,10 @@ buildscript {
     }
 }
 
+plugins {
+    id 'com.palantir.docker' version '0.19.2'
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
@@ -23,6 +27,14 @@ repositories {
     mavenCentral()
 }
 
+docker {
+    name "${project.group}/${jar.baseName}"
+    dockerfile file('src/main/resources/Dockerfile')
+    files jar.archivePath
+    buildArgs(['JAR_FILE': "${jar.archiveName}"])
+}
+
+docker.dependsOn(jar)
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-amqp")
