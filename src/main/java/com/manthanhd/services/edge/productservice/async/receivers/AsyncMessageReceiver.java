@@ -28,7 +28,7 @@ public class AsyncMessageReceiver {
     }
 
     @RabbitListener(queues = {"product-service"})
-    public void receiveCreateProductRequest(ProductAsyncMessage message) {
+    public void receiveMessage(ProductAsyncMessage message) {
         try {
             switch (message.getRequestType()) {
                 case CREATE:
@@ -73,5 +73,4 @@ public class AsyncMessageReceiver {
         final Product savedProduct = repository.save(product);
         LOGGER.info("Update Product [ASYNC] PAS: " + savedProduct.getProductId());
     }
-
 }

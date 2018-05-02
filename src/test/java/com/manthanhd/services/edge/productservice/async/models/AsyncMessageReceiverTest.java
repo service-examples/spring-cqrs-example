@@ -1,7 +1,15 @@
 package com.manthanhd.services.edge.productservice.async.models;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.manthanhd.services.edge.productservice.async.dao.AsyncRequestType;
+import com.manthanhd.services.edge.productservice.async.dao.CreateProductAsyncRequest;
+import com.manthanhd.services.edge.productservice.async.dao.ProductAsyncMessage;
+import com.manthanhd.services.edge.productservice.async.dao.UpdateProductAsyncRequest;
 import com.manthanhd.services.edge.productservice.async.receivers.AsyncMessageReceiver;
+import com.manthanhd.services.edge.productservice.models.Product;
 import com.manthanhd.services.edge.productservice.repository.ProductRepository;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +17,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = AsyncMessageReceiverTest.SpringConfiguration.class)
@@ -18,19 +31,74 @@ public class AsyncMessageReceiverTest {
     private ProductRepository mockProductRepository;
 
     @Autowired
-    private AsyncMessageReceiver receiver;
+    private AsyncMessageReceiver subject;
 
-    /*@Test
-    public void receiveCreateProductRequestSavesProduct() {
-        final Product fakeProduct = Product.newBuilder().description("some-description").name("some-name").build();
-        final CreateProductAsyncRequest createProductAsyncRequest = CreateProductAsyncRequest.newBuilder().name("some-name").description("some-description").build();
+    private ObjectMapper objectMapper;
 
-        Mockito.doReturn(fakeProduct).when(mockProductRepository).save(ArgumentMatchers.any());
+    @Before
+    public void setUp() throws Exception {
+        objectMapper = new ObjectMapper();
+    }
 
-        receiver.receiveCreateProductRequest(createProductAsyncRequest);
+    @Test
+    public void receiveMessageProcessesCreateProductAsyncRequest() throws Exception {
+        final CreateProductAsyncRequest createProductAsyncRequest = CreateProductAsyncRequest.newBuilder()
+                .name("awesome new product")
+                .description("epic description")
+                .build();
 
-        Mockito.verify(mockProductRepository, times(1)).save(ArgumentMatchers.any());
-    }*/
+        final String createProductAsyncRequestJsonString = objectMapper.writeValueAsString(createProductAsyncRequest);
+
+        final ProductAsyncMessage message = ProductAsyncMessage.newBuilder()
+                .requestType(AsyncRequestType.CREATE)
+                .request(createProductAsyncRequestJsonString)
+                .expires("1000")
+                .build();
+
+        final Product fakeProduct = Product.newBuilder()
+                .name("some-product")
+                .description("some-description")
+                .productId("abc123")
+                .build();
+        ;
+        Mockito.doReturn(fakeProduct).when(mockProductRepository).save(any(Product.class));
+
+        subject.receiveMessage(message);
+
+        Mockito.verify(mockProductRepository).save(any());
+    }
+
+    @Test
+    public void receiveMessageProcessesUpdateProductAsyncRequest() throws Exception {
+        final UpdateProductAsyncRequest createProductAsyncRequest = UpdateProductAsyncRequest.newBuilder()
+                .name("awesome new product")
+                .description("epic description")
+                .productId("abc123")
+                .build();
+
+        final String updateProductAsyncRequestJsonString = objectMapper.writeValueAsString(createProductAsyncRequest);
+
+        final ProductAsyncMessage message = ProductAsyncMessage.newBuilder()
+                .requestType(AsyncRequestType.UPDATE)
+                .request(updateProductAsyncRequestJsonString)
+                .expires("1000")
+                .build();
+
+        final Product fakeProduct = Product.newBuilder()
+                .name("some-product")
+                .description("some-description")
+                .productId("abc123")
+                .build();
+
+        final Optional<Product> fakeOptionalProduct = Optional.of(fakeProduct);
+        ;
+        Mockito.doReturn(fakeOptionalProduct).when(mockProductRepository).findById(eq("abc123"));
+
+        subject.receiveMessage(message);
+
+        Mockito.verify(mockProductRepository).findById(eq("abc123"));
+    }
+
 
     @Configuration
     public static class SpringConfiguration {
