@@ -1,10 +1,10 @@
 package com.manthanhd.services.edge.productservice.async.configuration;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistrar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +16,7 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 
 @Configuration
+@EnableRabbit
 public class AsyncConfiguration implements RabbitListenerConfigurer {
 
     @Value("${async.queue.name}")
@@ -28,9 +29,6 @@ public class AsyncConfiguration implements RabbitListenerConfigurer {
     private String topicExchangeName;
 
     @Autowired
-    private MessageConverter messageConverter;
-
-    @Autowired
     private MessageHandlerMethodFactory messageHandlerMethodFactory;
 
     @Bean
@@ -39,17 +37,7 @@ public class AsyncConfiguration implements RabbitListenerConfigurer {
     }
 
     @Bean
-    TopicExchange exchange() {
-        return new TopicExchange(topicExchangeName);
-    }
-
-    @Bean
-    Binding binding(Queue queue, TopicExchange topicExchange) {
-        return BindingBuilder.bind(queue).to(topicExchange).with(routingKey);
-    }
-
-    @Bean
-    MessageHandlerMethodFactory messageHandlerFactory() {
+    MessageHandlerMethodFactory messageHandlerFactory(MessageConverter messageConverter) {
         final DefaultMessageHandlerMethodFactory defaultMessageHandlerMethodFactory = new DefaultMessageHandlerMethodFactory();
         defaultMessageHandlerMethodFactory.setMessageConverter(messageConverter);
         return defaultMessageHandlerMethodFactory;
@@ -60,24 +48,17 @@ public class AsyncConfiguration implements RabbitListenerConfigurer {
         return new MappingJackson2MessageConverter();
     }
 
+    @Bean
+    public ConnectionFactory connectionFactory() {
+        CachingConnectionFactory connectionFactory = new CachingConnectionFactory("localhost");
+        connectionFactory.setUsername("guest");
+        connectionFactory.setPassword("guestpassword");
+        connectionFactory.setConnectionLimit(200);
+        return connectionFactory;
+    }
+
     @Override
     public void configureRabbitListeners(RabbitListenerEndpointRegistrar registrar) {
         registrar.setMessageHandlerMethodFactory(messageHandlerMethodFactory);
     }
-
-//    @Bean
-//    MessageListenerAdapter listenerAdapter(Receiver receiver) {
-//        final MessageListenerAdapter messageListenerAdapter = new MessageListenerAdapter(receiver, LISTENER_METHOD);
-//        messageListenerAdapter.setMessageConverter(new Jackson2JsonMessageConverter());
-//        return messageListenerAdapter;
-//    }
-//
-//    @Bean
-//    SimpleMessageListenerContainer container(ConnectionFactory connectionFactory, MessageListenerAdapter listenerAdapter) {
-//        final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory);
-//        container.setQueueNames(queueName);
-//        container.setMessageListener(listenerAdapter);
-//        container.setMessageConverter(new Jackson2JsonMessageConverter());
-//        return container;
-//    }
 }

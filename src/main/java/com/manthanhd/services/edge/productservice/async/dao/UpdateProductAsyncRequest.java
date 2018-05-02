@@ -1,36 +1,18 @@
-package com.manthanhd.services.edge.productservice.models;
+package com.manthanhd.services.edge.productservice.async.dao;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
+public class UpdateProductAsyncRequest {
 
-@Entity
-public class Product {
-    @Id
     private String productId;
-    @NotNull
     private String name;
     private String description;
 
-    private Product(Builder builder) {
+    public UpdateProductAsyncRequest() {
+    }
+
+    private UpdateProductAsyncRequest(Builder builder) {
         productId = builder.productId;
         name = builder.name;
         description = builder.description;
-    }
-
-    public Product() {
-    }
-
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public static Builder newBuilder() {
@@ -48,6 +30,7 @@ public class Product {
     public String getDescription() {
         return description;
     }
+
 
     public static final class Builder {
         private String productId;
@@ -72,8 +55,8 @@ public class Product {
             return this;
         }
 
-        public Product build() {
-            return new Product(this);
+        public UpdateProductAsyncRequest build() {
+            return new UpdateProductAsyncRequest(this);
         }
     }
 }
