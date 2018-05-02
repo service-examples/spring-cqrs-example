@@ -1,4 +1,4 @@
-package com.manthanhd.services.edge.productservice.async.models;
+package com.manthanhd.services.edge.productservice.async.receivers;
 
 import com.manthanhd.services.edge.productservice.async.dao.CreateProductAsyncRequest;
 import com.manthanhd.services.edge.productservice.models.Product;

@@ -1,6 +1,7 @@
 package com.manthanhd.services.edge.productservice.async.models;
 
 import com.manthanhd.services.edge.productservice.async.dao.CreateProductAsyncRequest;
+import com.manthanhd.services.edge.productservice.async.receivers.AsyncMessageReceiver;
 import com.manthanhd.services.edge.productservice.models.Product;
 import com.manthanhd.services.edge.productservice.repository.ProductRepository;
 import org.junit.Test;
