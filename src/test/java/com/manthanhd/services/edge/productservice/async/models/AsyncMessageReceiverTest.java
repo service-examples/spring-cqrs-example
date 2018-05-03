@@ -99,7 +99,6 @@ public class AsyncMessageReceiverTest {
         Mockito.verify(mockProductRepository).findById(eq("abc123"));
     }
 
-
     @Configuration
     public static class SpringConfiguration {
         @Bean
@@ -108,8 +107,8 @@ public class AsyncMessageReceiverTest {
         }
 
         @Bean
-        AsyncMessageReceiver receiver() {
-            return new AsyncMessageReceiver();
+        AsyncMessageReceiver receiver(ProductRepository repository) {
+            return new AsyncMessageReceiver(repository);
         }
     }
 }

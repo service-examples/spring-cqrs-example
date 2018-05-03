@@ -20,11 +20,12 @@ public class AsyncMessageReceiver {
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncMessageReceiver.class);
     private final ObjectMapper objectMapper;
 
-    @Autowired
-    private ProductRepository repository;
+    private final ProductRepository repository;
 
-    public AsyncMessageReceiver() {
-        objectMapper = new ObjectMapper();
+    @Autowired
+    public AsyncMessageReceiver(ProductRepository repository) {
+        this.objectMapper = new ObjectMapper();
+        this.repository = repository;
     }
 
     @RabbitListener(queues = {"product-service"})
