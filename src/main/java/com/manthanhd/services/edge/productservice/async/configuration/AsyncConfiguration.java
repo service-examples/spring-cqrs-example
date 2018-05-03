@@ -28,6 +28,18 @@ public class AsyncConfiguration implements RabbitListenerConfigurer {
     @Value("${async.topic.exchangeName")
     private String topicExchangeName;
 
+    @Value("${async.mq.server.hostname}")
+    private String mqHostname;
+
+    @Value("${async.mq.authentication.username}")
+    private String mqAuthenticationUsername;
+
+    @Value("${async.mq.authentication.password}")
+    private String mqAuthenticationPassword;
+
+    @Value("${async.mq.server.maxConnections}")
+    private int mqMaxConnections;
+
     @Autowired
     private MessageHandlerMethodFactory messageHandlerMethodFactory;
 
@@ -50,10 +62,10 @@ public class AsyncConfiguration implements RabbitListenerConfigurer {
 
     @Bean
     public ConnectionFactory connectionFactory() {
-        CachingConnectionFactory connectionFactory = new CachingConnectionFactory("localhost");
-        connectionFactory.setUsername("guest");
-        connectionFactory.setPassword("guestpassword");
-        connectionFactory.setConnectionLimit(200);
+        CachingConnectionFactory connectionFactory = new CachingConnectionFactory(mqHostname);
+        connectionFactory.setUsername(mqAuthenticationUsername);
+        connectionFactory.setPassword(mqAuthenticationPassword);
+        connectionFactory.setConnectionLimit(mqMaxConnections);
         return connectionFactory;
     }
 
