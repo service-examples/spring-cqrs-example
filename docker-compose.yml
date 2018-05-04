@@ -1,3 +1,9 @@
+app:
+  image: com.manthanhd.services.edge/product-service:latest
+  ports:
+    - 8080:8080
+  links:
+    - rabbitmq:rabbitmq
 rabbitmq:
   image: product-service/rabbitmq:latest
   ports:
